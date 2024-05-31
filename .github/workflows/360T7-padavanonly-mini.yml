@@ -1,0 +1,144 @@
+name: 360T7-padavanonly-mini
+
+on:
+  repository_dispatch:
+  workflow_dispatch:
+    inputs:
+      clean:
+         description: 'clean ccache'
+         default: 'false'
+
+  schedule:
+    - cron: '0 17 * * 1'
+
+env:
+  REPO_URL: https://github.com/padavanonly/immortalwrt-mt798x
+  REPO_BRANCH: openwrt-21.02
+  FEEDS_CONF: feeds.conf.default
+  CONFIG_FILE: ./doc/config/mt7986-ax6000-mtwifi-cfg.config
+  DIY_P1_SH: ./doc/diy/diy-360T7-hanwckf-1.sh
+  DIY_P2_SH: ./doc/diy/diy-360T7-padavanonly-2.sh
+  TZ: Asia/Shanghai
+  
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: write
+      
+    steps:
+    - name: Checkout
+      uses: actions/checkout@main
+    
+    - name: Prepare environment
+      env:
+        DEBIAN_FRONTEND: noninteractive
+      run: |
+         sudo rm -rf /etc/apt/sources.list.d/* /usr/share/dotnet /usr/local/lib/android /opt/ghc
+         sudo timedatectl set-timezone "$TZ"
+         sudo mkdir -p /workdir
+         sudo chown $USER:$GROUPS /workdir
+
+    - name: Clone source code
+      working-directory: /workdir
+      run: |
+         df -hT $PWD
+         git clone $REPO_URL -b $REPO_BRANCH openwrt
+         ln -sf /workdir/openwrt $GITHUB_WORKSPACE/openwrt
+    
+    - name: Cache
+      uses: klever1988/cachewrtbuild@main
+      with:
+         ccache: 'true'
+         mixkey: '360T7-padavanonly'
+         toolchain: 'true'
+         skip: 'true'
+         clean: ${{github.event.inputs.clean}}
+         prefix: ${{ github.workspace }}/openwrt
+           
+    - name: Load custom feeds
+      run: |
+         [ -e $FEEDS_CONF ] && mv $FEEDS_CONF openwrt/feeds.conf.default
+         cat ./doc/config/ua2f.config >> openwrt/.config
+         chmod +x $DIY_P1_SH
+         cd openwrt
+         $GITHUB_WORKSPACE/$DIY_P1_SH
+
+    - name: Update feeds
+      run: cd openwrt && ./scripts/feeds update -a
+      
+    - name: Install feeds
+      run: cd openwrt && ./scripts/feeds install -a
+
+    - name: Load custom configuration
+      run: |
+         [ -e files ] && mv files openwrt/files
+         [ -e $CONFIG_FILE ] && mv $CONFIG_FILE openwrt/.config
+         chmod +x $DIY_P2_SH
+         cd openwrt
+         $GITHUB_WORKSPACE/$DIY_P2_SH
+        
+    - name: Download package
+      id: package
+      run: |
+         cd openwrt
+         make defconfig
+         make download -j8
+         find dl -size -1024c -exec ls -l {} \;
+         find dl -size -1024c -exec rm -f {} \;
+
+    - name: Compile the firmware
+      id: compile
+      run: |
+         cd openwrt
+         echo -e "$(nproc) thread compile"
+         make -j$(nproc) || make -j1 V=s
+         echo "release_tag=360T7-padavanonly-OpenWrt-mini-$(date +%Y.%m.%d)" >> $GITHUB_ENV
+         echo "release_name=360T7-padavanonly-OpenWrt-mini" >> $GITHUB_ENV
+         echo "status=success" >> $GITHUB_OUTPUT
+
+    - name: Check space usage
+      if: (!cancelled())
+      run: df -hT
+
+    - name: Upload firmware directory
+      uses: actions/upload-artifact@main
+      if: steps.compile.outputs.status == 'success' && !cancelled()
+      with:
+         name: ${{ env.release_tag }}
+         path: openwrt/bin
+
+    - name: Organize files
+      id: organize
+      if: steps.compile.outputs.status == 'success' && !cancelled()
+      run: |
+         tar -cvf openwrt/bin/targets/mediatek/mt7986/packages.tar openwrt/bin/packages
+         cd openwrt/bin/targets/mediatek/mt7986
+         rm -rf packages
+         rm -rf feeds.buildinfo
+         rm -rf sha256sums
+         rm -rf version.buildinfo
+         rm -rf *kernel.bin
+         rm -rf *manifest
+         rm -rf *tar.bz2
+         echo "FIRMWARE=$PWD" >> $GITHUB_ENV
+         echo "status=success" >> $GITHUB_OUTPUT
+        
+    - name: Upload firmware to release
+      uses: softprops/action-gh-release@v2
+      if: steps.organize.outputs.status == 'success' && !cancelled()
+      with:
+         name: ${{ env.release_name }}
+         tag_name: ${{ env.release_tag }}
+         body: |
+             Gateway：192.168.50.1
+             Password：password
+             Application：mwan3，ramfree，ua2f
+         files: ${{ env.FIRMWARE }}/*
+
+    - name: Delete older releases
+      uses: dev-drprasad/delete-older-releases@v0.3.3
+      with:
+        keep_latest: 3
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
