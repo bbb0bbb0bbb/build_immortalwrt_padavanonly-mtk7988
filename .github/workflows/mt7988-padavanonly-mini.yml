@@ -1,4 +1,4 @@
-name: 360T7-padavanonly-mini
+name: mt7988-padavanonly-mini
 
 on:
   repository_dispatch:
@@ -15,9 +15,9 @@ env:
   REPO_URL: https://github.com/padavanonly/immortalwrt-mt798x
   REPO_BRANCH: openwrt-21.02
   FEEDS_CONF: feeds.conf.default
-  CONFIG_FILE: ./doc/config/mt7986-ax6000-mtwifi-cfg.config
-  DIY_P1_SH: ./doc/diy/diy-360T7-hanwckf-1.sh
-  DIY_P2_SH: ./doc/diy/diy-360T7-padavanonly-2.sh
+  CONFIG_FILE: ./doc/config/mt7988-ax6000-mtwifi-cfg.config
+  DIY_P1_SH: ./doc/diy/diy-mt7988-hanwckf-1.sh
+  DIY_P2_SH: ./doc/diy/diy-mt7988-padavanonly-2.sh
   TZ: Asia/Shanghai
   
 jobs:
@@ -50,7 +50,7 @@ jobs:
       uses: klever1988/cachewrtbuild@main
       with:
          ccache: 'true'
-         mixkey: '360T7-padavanonly'
+         mixkey: 'mt7988-padavanonly'
          toolchain: 'true'
          skip: 'true'
          clean: ${{github.event.inputs.clean}}
@@ -93,8 +93,8 @@ jobs:
          cd openwrt
          echo -e "$(nproc) thread compile"
          make -j$(nproc) || make -j1 V=s
-         echo "release_tag=360T7-padavanonly-OpenWrt-mini-$(date +%Y.%m.%d)" >> $GITHUB_ENV
-         echo "release_name=360T7-padavanonly-OpenWrt-mini" >> $GITHUB_ENV
+         echo "release_tag=mt7988-padavanonly-OpenWrt-mini-$(date +%Y.%m.%d)" >> $GITHUB_ENV
+         echo "release_name=mt7988-padavanonly-OpenWrt-mini" >> $GITHUB_ENV
          echo "status=success" >> $GITHUB_OUTPUT
 
     - name: Check space usage
@@ -112,8 +112,8 @@ jobs:
       id: organize
       if: steps.compile.outputs.status == 'success' && !cancelled()
       run: |
-         tar -cvf openwrt/bin/targets/mediatek/mt7986/packages.tar openwrt/bin/packages
-         cd openwrt/bin/targets/mediatek/mt7986
+         tar -cvf openwrt/bin/targets/mediatek/mt7988/packages.tar openwrt/bin/packages
+         cd openwrt/bin/targets/mediatek/mt7988
          rm -rf packages
          rm -rf feeds.buildinfo
          rm -rf sha256sums
