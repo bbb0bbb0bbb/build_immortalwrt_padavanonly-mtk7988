@@ -4,7 +4,7 @@
 
 <h1 align="center">
 
-GitHub Actions For 360T7 OpenWrt
+GitHub Actions For MT7988 OpenWrt
 
 </h1>
 
@@ -34,8 +34,8 @@ GitHub Actions For 360T7 OpenWrt
 ├── doc
 │   ├── backup                             旧文件备份
 │   ├── config
-│   │   ├── 360T7-hanwckf-mini.config      固件定制
-│   │   ├── 360T7-padavanonly-mini.config  固件定制
+│   │   ├── MT7988.config                  固件定制
+│   │   |
 │   │   ├── ua2f.config                    ua2f 依赖
 │   ├── diy                                自定义脚本文件
 │   ├── img                                图片存放处
