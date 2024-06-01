@@ -28,8 +28,8 @@ GitHub Actions For MT7988 OpenWrt
 ```tree
 360T7
 ├── .github/workflows
-│   ├── 360T7-hanwckf-mini.yml             拉取 hanwckf 源码进行编译
-│   ├── 360T7-padavanonly-mini.yml         拉取 padavanonly 源码进行编译
+│   | 
+│   ├── MT7988-padavanonly-mini.yml         拉取 padavanonly 源码进行编译
 │   ├── update-checker.yml                 定时检查源码的更新情况
 ├── doc
 │   ├── backup                             旧文件备份
