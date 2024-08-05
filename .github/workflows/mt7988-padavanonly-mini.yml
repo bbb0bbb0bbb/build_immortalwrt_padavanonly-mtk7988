@@ -13,11 +13,11 @@ on:
 
 env:
   REPO_URL: https://github.com/coolsnowwolf/lede
-  REPO_BRANCH: mt7988
+  REPO_BRANCH: mt7981
   FEEDS_CONF: feeds.conf.default
-  CONFIG_FILE: ./doc/config/mt7988.config
-  DIY_P1_SH: ./doc/diy/diy-mt7988-hanwckf-1.sh
-  DIY_P2_SH: ./doc/diy/diy-mt7988-padavanonly-2.sh
+  CONFIG_FILE: ./doc/config/mt7981.config
+  DIY_P1_SH: ./doc/diy/diy-mt7981-hanwckf-1.sh
+  DIY_P2_SH: ./doc/diy/diy-mt7981-padavanonly-2.sh
   TZ: Asia/Shanghai
   
 jobs:
