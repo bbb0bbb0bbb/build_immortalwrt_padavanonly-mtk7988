@@ -12,7 +12,7 @@ on:
     - cron: '0 17 * * 1'
 
 env:
-  REPO_URL: https://github.com/padavanonly/immortalwrt-mt798x
+  REPO_URL: https://github.com/coolsnowwolf/lede
   REPO_BRANCH: mt7988
   FEEDS_CONF: feeds.conf.default
   CONFIG_FILE: ./doc/config/mt7988.config
