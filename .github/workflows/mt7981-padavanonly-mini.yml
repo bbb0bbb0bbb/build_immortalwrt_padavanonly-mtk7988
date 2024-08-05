@@ -1,4 +1,4 @@
-name: mt7988-padavanonly-mini
+name: mt7981-padavanonly-mini
 
 on:
   repository_dispatch:
