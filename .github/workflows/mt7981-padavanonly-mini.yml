@@ -1,1 +1,13 @@
 
+name: mt7981-padavanonly-mini
+
+on:
+  repository_dispatch:
+  workflow_dispatch:
+    inputs:
+      clean:
+         description: 'clean ccache'
+         default: 'false'
+
+  schedule:
+    - cron: '0 17 * * 1'
